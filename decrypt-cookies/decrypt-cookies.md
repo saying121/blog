@@ -142,7 +142,7 @@ impl<B: ChromiumPath + Send + Sync> ChromiumBuilder<B> {
 - 在 Linux 平台的 [zbus] crate 是异步的，以至于 [secret-service] 也是异步的，
   即使有同步的 API 也只是对异步 API 的包装。
 - Cookies 都是在网络请求时才会用到，想必 [reqwest] 的用户不会使用同步 API。
-- sea-orm 的 cli 工具相当好用，可以很轻松的生成 Entity 省去了很多麻烦。
+- [sea-orm] 的 cli 工具相当好用，可以很轻松的生成 Entity 省去了很多麻烦。
 
 ## 代码库中做的性能优化
 
@@ -228,6 +228,7 @@ Windows 平台需要从系统进程中获取相关 token 才能够调用相关�
 [secret-service]: https://crates.io/crates/secret-service
 [zbus]: https://crates.io/crates/zbus
 [reqwest]: https://crates.io/crates/reqwest
+[sea-orm]: https://crates.io/crates/sea-orm
 [cache linux secret]: https://github.com/saying121/tidy-browser/commit/8304474
 [accept a pid]: https://github.com/saying121/tidy-browser/commit/f7fef9a
 [avoid unnecessary windows syscall]: https://github.com/saying121/tidy-browser/commit/edbf3fd
