@@ -7,7 +7,8 @@
     - [架构的转变](#架构的转变)
     - [转变后带来的复杂性](#转变后带来的复杂性)
   - [为什么采用异步编程](#为什么采用异步编程)
-  - [代码库中做的一些优化](#代码库中做的一些优化)
+  - [代码库中做的性能优化](#代码库中做的性能优化)
+  - [最后](#最后)
   <!--toc:end-->
 
 在开发 [lcode] 时需要进行身份验证来提交题解，最初我让用户手动将 cookies
@@ -141,7 +142,7 @@ impl<B: ChromiumPath + Send + Sync> ChromiumBuilder<B> {
 - 在 Linux 平台的 [zbus] crate 是异步的，以至于 [secret-service] 也是异步的，
   即使有同步的 API 也只是对异步 API 的包装。
 - Cookies 都是在网络请求时才会用到，想必 [reqwest] 的用户不会使用同步 API。
-- sea-orm 的 cli 工具是相当好用的，可以很轻松的生成 Entity 省去了很多麻烦。
+- sea-orm 的 cli 工具相当好用，可以很轻松的生成 Entity 省去了很多麻烦。
 
 ## 代码库中做的性能优化
 
@@ -208,10 +209,19 @@ Windows 平台需要从系统进程中获取相关 token 才能够调用相关�
 
 于是我将 `Cookie` 和 `Login` 进行了区分，以及使用 `#[cold]`[^1] 表示这个函数是不经常执行的，来得到更好的分支预测性能，不过在粗略的测试中[^2]整体差距只有2%。
 
+## 最后
+
+如果对于代码逻辑比较了解的话可以从逻辑上进行很多优化，
+在写的代码足够多之后很多地方在写的时候就可以意识到这里会产生什么样的影响，如果不对代码进行 review 和总结
+，也不能有很多进步。
+
+[tidy-browser] 中还有一个我比较满意的 crate [binary-cookies] 有时间再聊一聊。
+
 <!-- links -->
 
 [decrypt-cookies]: https://crates.io/crates/decrypt-cookies
 [tidy-browser]: https://crates.io/crates/tidy-browser
+[binary-cookies]: https://crates.io/crates/binary-cookies
 [lcode]: https://github.com/saying121/lcode
 [Chromium]: https://source.chromium.org/
 [better-sqlite3]: https://github.com/WiseLibs/better-sqlite3
