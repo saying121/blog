@@ -143,7 +143,7 @@ impl<B: ChromiumPath + Send + Sync> ChromiumBuilder<B> {
 - Cookies 都是在网络请求时才会用到，想必 [reqwest] 的用户不会使用同步 API。
 - sea-orm 的 cli 工具是相当好用的，可以很轻松的生成 Entity 省去了很多麻烦。
 
-## 代码库中做的一些优化
+## 代码库中做的性能优化
 
 - [缓存相关数据][cache linux secret]
 
