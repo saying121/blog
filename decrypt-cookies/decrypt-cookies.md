@@ -146,19 +146,19 @@ impl<B: ChromiumPath + Send + Sync> ChromiumBuilder<B> {
 
 ## 代码库中做的性能优化
 
-- [缓存相关数据][cache linux secret]
+### [缓存相关数据][cache linux secret]
 
 在 Linux 平台需要通过 D-Bus 来获取浏览器相关的 secret 值，每次创建一个 `Getter` 都需要从中获取
 ，其实 crate 是已经内置了一些 secret label，那么就可以将需要的 secret 进行缓存。
 
-- [避免重复的系统调用][avoid unnecessary windows syscall]
+### [避免重复的系统调用][avoid unnecessary windows syscall]
 
 Windows 平台需要从系统进程中获取相关 token 才能够调用相关的 Windows 解密 API
 ，那么只需要[获取一次 pid][accept a pid]，
 不需要每次调用都去获取。
 这里是一个很简单的逻辑优化，只是做起来麻烦，以及作者是否详细 review 了代码。
 
-- [分支预测优化][separation cookie and login]
+### [分支预测优化][separation cookie and login]
 
 ```gitsendemail
 +/// Maybe use [`std::hint::unlikely`]
@@ -209,6 +209,13 @@ Windows 平台需要从系统进程中获取相关 token 才能够调用相关�
 
 于是我将 `Cookie` 和 `Login` 进行了区分，以及使用 `#[cold]`[^1] 表示这个函数是不经常执行的，来得到更好的分支预测性能，不过在粗略的测试中[^2]整体差距只有2%。
 
+### [内存分配优化][unnecessary alloc]
+
+在此 crate 中经常需要获取不同浏览器的路径信息，就需要频繁的对路径进行拼接等操作，
+如果简单的使用 `PathBuf::push` 等方法可能会导致频繁的内存分配，这时就需要使用 `PathBuf::with_capacity`, `PathBuf::reserve_exact` 等方法预分配足够的内存，
+
+如果想要对程序进行优化，我想可以先全局搜索一番 `{Vec,PathBuf}::new` 的使用，并考虑是否可以替换为 `with_capacity`。
+
 ## 最后
 
 如果对于代码逻辑比较了解的话可以从逻辑上进行很多优化，
@@ -233,6 +240,7 @@ Windows 平台需要从系统进程中获取相关 token 才能够调用相关�
 [accept a pid]: https://github.com/saying121/tidy-browser/commit/f7fef9a
 [avoid unnecessary windows syscall]: https://github.com/saying121/tidy-browser/commit/edbf3fd
 [separation cookie and login]: https://github.com/saying121/tidy-browser/commit/b08dfc2
+[unnecessary alloc]: https://github.com/saying121/tidy-browser/commit/2f97f01
 
 [^2]: 像是从系统获取 secret 的时间，访问 sqlite 的时间并未排除，我只想要看到它是否生效
 
